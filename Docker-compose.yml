@@ -15,6 +15,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+
   pedidos:
     build: ./src/pedidos
     container_name: pedidos-service
@@ -29,6 +30,7 @@ services:
       DB_NAME: db_sistema
     depends_on:
       - mysql
+
 
   pagamentos:
     build: ./src/pagamentos
