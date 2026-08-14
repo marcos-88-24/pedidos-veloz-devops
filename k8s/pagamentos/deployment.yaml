@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: pagamentos
-          image: marcos001001/pagamentos:latest 
+          image: marcos001001/pagamentos:v2
           ports:
             - containerPort: 3002
           env:

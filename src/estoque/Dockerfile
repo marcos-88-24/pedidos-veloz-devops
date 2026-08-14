@@ -1,4 +1,5 @@
-FROM node:18-alpine
+# Fase de build
+FROM node:18-alpine AS build
 
 WORKDIR /usr/src/app
 
@@ -7,5 +8,19 @@ RUN npm install
 
 COPY . .
 
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY --from=build /usr/src/app/package*.json ./
+RUN npm ci --only=production
+
+COPY --from=build /usr/src/app . 
+
+USER appuser
+
 EXPOSE 3003
+
 CMD ["node", "index.js"]

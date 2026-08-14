@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: estoque
-          image: marcos001001/estoque:latest  
+          image: marcos001001/estoque:v2
           ports:
             - containerPort: 3003
           env:

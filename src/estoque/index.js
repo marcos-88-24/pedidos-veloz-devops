@@ -5,27 +5,51 @@ const port = 3003;
 
 app.use(express.json());
 
-// rota principal
+// principal
 app.get('/', (req, res) => {
     res.send('Estoque rodando!');
 });
 
-// rota de health check
+// health check
 app.get('/health', (req, res) => {
-    res.sendStatus(200); // retorna apenas 200 OK
+    res.sendStatus(200);
 });
 
 // listar itens do estoque
 app.get('/estoque', async (req, res) => {
-    const [rows] = await pool.query('SELECT * FROM estoque');
-    res.json(rows);
+    try {
+        const [rows] = await pool.query('SELECT * FROM estoque');
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao listar estoque' });
+    }
 });
 
 // adicionar item ao estoque
 app.post('/estoque', async (req, res) => {
-    const { produto, quantidade } = req.body;
-    await pool.query('INSERT INTO estoque (produto, quantidade) VALUES (?, ?)', [produto, quantidade]);
-    res.json({ message: 'Item adicionado ao estoque!', item: { produto, quantidade } });
+    try {
+        const { produto, quantidade } = req.body;
+
+        if (!produto || !quantidade) {
+            return res.status(400).json({ error: 'Produto e quantidade são obrigatórios' });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO estoque (produto, quantidade) VALUES (?, ?)',
+            [produto, quantidade]
+        );
+
+        const [rows] = await pool.query('SELECT * FROM estoque WHERE id = ?', [result.insertId]);
+
+        res.json({ 
+            message: 'Item adicionado ao estoque!', 
+            item: rows[0] 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao adicionar item ao estoque' });
+    }
 });
 
 app.listen(port, () => {

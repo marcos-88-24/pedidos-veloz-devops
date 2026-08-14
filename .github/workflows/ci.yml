@@ -14,6 +14,26 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v3
 
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+
+      - name: Checar formatação
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes automatizados
+        run: npm test
+
+      - name: Build do projeto
+        run: npm run build
+
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -43,10 +63,3 @@ jobs:
           context: ./src/estoque
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/estoque:latest
-
-      - name: Rodar testes
-        run: |
-          echo "Rodando testes automatizados..."
-          # Aqui você pode colocar comandos como:
-          # npm test
-          # pytest

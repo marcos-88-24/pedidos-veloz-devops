@@ -1,31 +1,55 @@
 const express = require('express');
-const pool = require('./db');
+const pool = require('./db'); 
 const app = express();
 const port = 3001;
 
 app.use(express.json());
 
-// rota principal
+// principal
 app.get('/', (req, res) => {
     res.send('Pedidos rodando!');
 });
 
-// rota de health check
+// health check
 app.get('/health', (req, res) => {
-    res.sendStatus(200); // retorna apenas 200 OK
+    res.sendStatus(200);
 });
 
 // listar pedidos
 app.get('/pedidos', async (req, res) => {
-    const [rows] = await pool.query('SELECT * FROM pedidos');
-    res.json(rows);
+    try {
+        const [rows] = await pool.query('SELECT * FROM pedidos');
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao listar pedidos' });
+    }
 });
 
-// criar pedido
+// adicionar pedido
 app.post('/pedidos', async (req, res) => {
-    const { produto, status } = req.body;
-    await pool.query('INSERT INTO pedidos (produto, status) VALUES (?, ?)', [produto, status]);
-    res.json({ message: 'Pedido criado com sucesso!', pedido: { produto, status } });
+    try {
+        const { cliente, produto, quantidade } = req.body;
+
+        if (!cliente || !produto || !quantidade) {
+            return res.status(400).json({ error: 'Cliente, produto e quantidade são obrigatórios' });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO pedidos (cliente, produto, quantidade) VALUES (?, ?, ?)',
+            [cliente, produto, quantidade]
+        );
+
+        const [rows] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [result.insertId]);
+
+        res.json({ 
+            message: 'Pedido criado com sucesso!', 
+            pedido: rows[0] 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao criar pedido' });
+    }
 });
 
 app.listen(port, () => {

@@ -1,34 +1,55 @@
 const express = require('express');
-const pool = require('./db');
+const pool = require('./db'); 
 const app = express();
 const port = 3002;
 
 app.use(express.json());
 
-// rota principal
+// principal
 app.get('/', (req, res) => {
     res.send('Pagamentos rodando!');
 });
 
-// rota de health check
+// health check
 app.get('/health', (req, res) => {
-    res.sendStatus(200); // retorna apenas 200 OK
+    res.sendStatus(200);
 });
 
 // listar pagamentos
 app.get('/pagamentos', async (req, res) => {
-    const [rows] = await pool.query('SELECT * FROM pagamentos');
-    res.json(rows);
+    try {
+        const [rows] = await pool.query('SELECT * FROM pagamentos');
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao listar pagamentos' });
+    }
 });
 
-// criar pagamento
+// registrar pagamento
 app.post('/pagamentos', async (req, res) => {
-    const { pedido_id, valor, metodo, status } = req.body;
-    await pool.query(
-        'INSERT INTO pagamentos (pedido_id, valor, metodo, status) VALUES (?, ?, ?, ?)',
-        [pedido_id, valor, metodo, status]
-    );
-    res.json({ message: 'Pagamento registrado!', pagamento: { pedido_id, valor, metodo, status } });
+    try {
+        const { pedido_id, valor, metodo } = req.body;
+
+        if (!pedido_id || !valor || !metodo) {
+            return res.status(400).json({ error: 'Pedido, valor e método são obrigatórios' });
+        }
+
+        const [result] = await pool.query(
+            'INSERT INTO pagamentos (pedido_id, valor, metodo) VALUES (?, ?, ?)',
+            [pedido_id, valor, metodo]
+        );
+
+        const [rows] = await pool.query('SELECT * FROM pagamentos WHERE id = ?', [result.insertId]);
+
+        res.json({ 
+            message: 'Pagamento registrado com sucesso!', 
+            pagamento: rows[0] 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao registrar pagamento' });
+    }
 });
 
 app.listen(port, () => {

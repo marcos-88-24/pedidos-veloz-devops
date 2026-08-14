@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: pedidos
-          image: marcos001001/pedidos:latest   
+          image: marcos001001/pedidos:v2  
           ports:
             - containerPort: 3001
           env:

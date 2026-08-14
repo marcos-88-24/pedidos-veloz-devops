@@ -7,7 +7,7 @@ spec:
     app: estoque
   ports:
     - protocol: TCP
-      port: 3003        # porta interna do serviço
-      targetPort: 3003  # porta do container
-      nodePort: 30003   # porta exposta no Node
+      port: 3003
+      targetPort: 3003
+      nodePort: 31003
   type: NodePort

@@ -1,33 +1,6 @@
 version: "3.9"
 
 services:
-  pedidos:
-    build: ./src/pedidos
-    container_name: pedidos-service
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    depends_on:
-      - mysql
-
-  pagamentos:
-    build: ./src/pagamentos
-    container_name: pagamentos-service
-    restart: unless-stopped
-    ports:
-      - "3002:3002"
-    depends_on:
-      - mysql
-
-  estoque:
-    build: ./src/estoque
-    container_name: estoque-service
-    restart: unless-stopped
-    ports:
-      - "3003:3003"
-    depends_on:
-      - mysql
-
   mysql:
     image: mysql:8.0
     container_name: sistema-mysql
@@ -41,6 +14,51 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  pedidos:
+    build: ./src/pedidos
+    container_name: pedidos-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: marcos
+      DB_PASSWORD: 123456878
+      DB_NAME: db_sistema
+    depends_on:
+      - mysql
+
+  pagamentos:
+    build: ./src/pagamentos
+    container_name: pagamentos-service
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: marcos
+      DB_PASSWORD: 123456878
+      DB_NAME: db_sistema
+    depends_on:
+      - mysql
+
+  estoque:
+    build: ./src/estoque
+    container_name: estoque-service
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: marcos
+      DB_PASSWORD: 123456878
+      DB_NAME: db_sistema
+    depends_on:
+      - mysql
 
 volumes:
   mysql_data:
