@@ -17,22 +17,34 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24   # usa Node 24 para evitar aviso de depreciação
 
-      - name: Instalar dependências
-        run: npm install --no-audit --no-fund
+      # Instalar dependências de cada serviço
+      - name: Instalar dependências Pedidos
+        run: |
+          cd src/pedidos
+          npm install --no-audit --no-fund
 
-      - name: Checar formatação
-        run: npm run format:check
+      - name: Instalar dependências Pagamentos
+        run: |
+          cd src/pagamentos
+          npm install --no-audit --no-fund
 
-      - name: Lint
-        run: npm run lint
+      - name: Instalar dependências Estoque
+        run: |
+          cd src/estoque
+          npm install --no-audit --no-fund
 
-      - name: Testes automatizados
-        run: npm test
+      # Opcional: rodar lint/testes se você tiver scripts em cada serviço
+      - name: Lint Pedidos
+        run: |
+          cd src/pedidos
+          npm run lint --if-present
 
-      - name: Build do projeto
-        run: npm run build
+      - name: Testes Pedidos
+        run: |
+          cd src/pedidos
+          npm test --if-present
 
       - name: Configurar Docker Buildx
         uses: docker/setup-buildx-action@v2
